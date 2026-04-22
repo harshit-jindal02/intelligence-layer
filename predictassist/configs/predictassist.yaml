@@ -1,0 +1,79 @@
+# predictassist — proactive intelligence layer configuration
+
+ingestion:
+  otlp:
+    grpc_port: 4317
+    max_recv_msg_size_mb: 16
+  batch:
+    max_size: 1024
+    flush_interval: 2s
+
+features:
+  windows:
+    - 1m
+    - 5m
+    - 15m
+  computation_interval: 10s
+  metrics:
+    - error_rate
+    - latency_p99
+    - throughput
+    - saturation
+
+detection:
+  zscore:
+    threshold: 3.0
+    baseline_window: 1h
+    min_data_points: 30
+  evaluation_interval: 15s
+  cooldown: 5m
+
+correlation:
+  time_window: 2m
+  min_similarity: 0.7
+  max_group_size: 50
+
+reasoner:
+  provider: claude
+  model: claude-sonnet-4-20250514
+  max_tokens: 4096
+  temperature: 0.2
+  timeout: 30s
+
+storage:
+  clickhouse:
+    host: localhost
+    port: 9000
+    database: predictassist
+    username: default
+    password: ""
+    max_open_conns: 10
+    dial_timeout: 10s
+  redis:
+    addr: localhost:6379
+    password: ""
+    db: 0
+    pool_size: 20
+
+events:
+  nats:
+    url: nats://localhost:4222
+    cluster_id: predictassist
+    client_id: predictassist-server
+    max_reconnects: 60
+    reconnect_wait: 2s
+
+api:
+  grpc_port: 9090
+  rest_port: 8090
+  read_timeout: 30s
+  write_timeout: 30s
+  cors:
+    allowed_origins:
+      - "*"
+
+logging:
+  level: info
+  encoding: json
+  output_paths:
+    - stdout
